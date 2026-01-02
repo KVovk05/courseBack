@@ -10,7 +10,6 @@ import { db } from './config/dbConfig.js';
 dotenv.config();
 
 const app = express();
-const cors = require('cors');
 
 const allowedOrigins = [
   'http://localhost:5173',
