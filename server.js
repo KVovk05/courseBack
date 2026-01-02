@@ -13,12 +13,21 @@ const app = express();
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://course-front-ge05qci88-kyrylos-projects-adcc84b2.vercel.app', // ваш Vercel-домен
-  'https://courseproject-0teu.onrender.com' // якщо потрібно
+  'https://course-front-ge05qci88-kyrylos-projects-adcc84b2.vercel.app',
+  'https://course-front-osppbasxf-kyrylos-projects-adcc84b2.vercel.app', // додано новий Vercel-домен
+  'https://courseproject-0teu.onrender.com'
 ];
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    // Якщо запит без origin (наприклад, з Postman) — дозволяємо
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
