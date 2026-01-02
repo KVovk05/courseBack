@@ -11,43 +11,49 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://course-front-ge05qci88-kyrylos-projects-adcc84b2.vercel.app',
-  'https://course-front-osppbasxf-kyrylos-projects-adcc84b2.vercel.app', // додано новий Vercel-домен
-  'https://courseproject-0teu.onrender.com'
-];
-
+// Список разрешенных адресов
+// ВАЖНО: Добавь сюда основной домен Vercel (без хэшей osppbasxf), 
+// чтобы он работал всегда, даже после обновлений фронтенда.
 app.use(cors({
   origin: function (origin, callback) {
-    // Якщо запит без origin (наприклад, з Postman) — дозволяємо
+    // 1. Разрешаем запросы без origin (Postman, серверные скрипты)
     if (!origin) return callback(null, true);
+
+    // 2. Проверяем точные совпадения (Localhost и Render)
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:5000',
+      'https://courseproject-0teu.onrender.com'
+    ];
+
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS'));
     }
+
+    // 3. 🔥 ГЛАВНОЕ: Разрешаем ВСЕ поддомены Vercel
+    // Це дозволить і production, і preview посилання
+    if (origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
+    // Якщо нічого не підійшло — блокуємо і пишемо в лог, ХТО це був
+    console.log('🚫 BLOCKED BY CORS:', origin); 
+    return callback(new Error('Not allowed by CORS'));
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', allowedOrigins.join(','));
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
+
+
+app.use(express.json()); // Не забудь парсер JSON, если его не было
 
 // Маршрути
 app.use('/api', authRoutes);
 app.use('/api', marksRoutes);
 app.use('/api/rating', ratingRoutes);
-app.use('/api', ordersRoutes); // Маршрути для замовлень
-
+app.use('/api', ordersRoutes);
 
 // Тестовий маршрут
 app.get('/', (req, res) => {
