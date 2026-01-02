@@ -28,7 +28,7 @@
    FIREBASE_PRIVATE_KEY=...
    JWT_SECRET=...
    ```
-3. Запустіть сервер:
+3. Запустіть сервер локально:
    ```sh
    npm run dev
    ```
@@ -36,12 +36,14 @@
    ```sh
    node server.js
    ```
-4. API буде доступне на [http://localhost:5000](http://localhost:5000)
+4. У продакшн API буде доступне на [https://courseproject-0teu.onrender.com](https://courseproject-0teu.onrender.com)
 
 ## Важливо
 - Для роботи потрібен налаштований Firebase проект (див. `FIREBASE_SETUP.md`).
 - Для захищених маршрутів потрібен валідний JWT токен (отримується після логіну).
 - Фронтенд очікує API на `VITE_API_BASE_URL` (див. `.env` у фронті).
+- Для деплою на Render/Heroku/інше — додайте відповідні змінні середовища у налаштуваннях платформи.
+- CORS повинен дозволяти домен вашого фронтенду (див. інструкцію у server.js).
 
 ## Автор
 Вовк Кирило, ОІ-22

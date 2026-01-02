@@ -10,9 +10,16 @@ import { db } from './config/dbConfig.js';
 dotenv.config();
 
 const app = express();
-app.use(express.json());
+const cors = require('cors');
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://course-front-ge05qci88-kyrylos-projects-adcc84b2.vercel.app', // ваш Vercel-домен
+  'https://courseproject-0teu.onrender.com' // якщо потрібно
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: allowedOrigins,
   credentials: true
 }));
 
