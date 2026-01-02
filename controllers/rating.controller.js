@@ -3,32 +3,36 @@ import { getFirestore } from 'firebase-admin/firestore';
 const db = getFirestore();
 
 export const submitRating = async (req, res) => {
-  const { initiativeId, userId, rate } = req.body;
+  const { serviceId, initiativeId, userId, rate } = req.body;
+
+  // Підтримка як services, так і initiatives для сумісності
+  const entityId = serviceId || initiativeId;
+  const collectionName = serviceId ? 'services' : 'initiatives';
 
   // Додаткові перевірки
   if (
-    typeof initiativeId !== 'string' || initiativeId.trim() === '' ||
+    typeof entityId !== 'string' || entityId.trim() === '' ||
     typeof userId !== 'string' || userId.trim() === '' ||
     typeof rate !== 'number'
   ) {
-    console.log('❌ Неправильні дані:', { initiativeId, userId, rate });
+    console.log('❌ Неправильні дані:', { entityId, userId, rate });
     return res.status(400).json({ error: 'Invalid or missing fields' });
   }
 
   try {
-    console.log('📥 Отримано запит на рейтинг:', { initiativeId, userId, rate });
+    console.log('📥 Отримано запит на рейтинг:', { entityId, userId, rate, collectionName });
 
     const ratingRef = db
-      .collection('initiatives')
-      .doc(initiativeId)
+      .collection(collectionName)
+      .doc(entityId)
       .collection('ratings')
       .doc(userId);
 
-    await ratingRef.set({ rate,userId }, { merge: true });
+    await ratingRef.set({ rate, userId }, { merge: true });
 
     const ratingsSnap = await db
-      .collection('initiatives')
-      .doc(initiativeId)
+      .collection(collectionName)
+      .doc(entityId)
       .collection('ratings')
       .get();
 
@@ -45,7 +49,7 @@ export const submitRating = async (req, res) => {
 
     const averageRating = count > 0 ? total / count : 0;
 
-    await db.collection('initiatives').doc(initiativeId).update({
+    await db.collection(collectionName).doc(entityId).update({
       averageRating
     });
 

@@ -3,26 +3,24 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes.js';
 import marksRoutes from './routes/marks.routes.js';
-import ratingRoutes from './routes/rating.js'; // ← додано
+import ratingRoutes from './routes/rating.js';
+import ordersRoutes from './routes/orders.routes.js';
 import { db } from './config/dbConfig.js';
 
-
-
-
 dotenv.config();
- // ← додаємо firebase-admin
-
 
 const app = express();
-app.use(express.json())
+app.use(express.json());
 app.use(cors({
-
-  credentials: true // якщо використовуєш cookies або auth
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
 }));
+
 // Маршрути
 app.use('/api', authRoutes);
 app.use('/api', marksRoutes);
-app.use('/api/rating', ratingRoutes); // ← маршрут для рейтингу
+app.use('/api/rating', ratingRoutes);
+app.use('/api', ordersRoutes); // Маршрути для замовлень
 
 
 // Тестовий маршрут

@@ -3,31 +3,40 @@ import { db } from '../config/dbConfig.js';
 class MarksController {
   async getInitiativeRatings(req, res) {
     try {
-      const { id } = req.params; // Отримуємо ID ініціативи з параметрів маршруту
+      const { id } = req.params; 
+      const { type } = req.query; // Додаємо параметр type для визначення колекції
 
-      console.log('db:', db); // Діагностика
+      // Підтримка як services, так і initiatives
+      const collectionName = type === 'service' ? 'services' : 'initiatives';
 
-      // Отримуємо документ ініціативи за ID
-      const initiativeRef = db.collection('initiatives').doc(id);
-      const initiativeSnap = await initiativeRef.get();
+      console.log('db:', db); 
 
-      if (!initiativeSnap.exists) {
-        return res.status(404).json({ message: 'Initiative not found' });
+     
+      const entityRef = db.collection(collectionName).doc(id);
+      const entitySnap = await entityRef.get();
+
+      if (!entitySnap.exists) {
+        return res.status(404).json({ message: `${collectionName === 'services' ? 'Service' : 'Initiative'} not found` });
       }
 
-      // Отримуємо всі документи з підколекції ratings
-      const ratingsSnap = await initiativeRef.collection('ratings').get();
+     
+      const ratingsSnap = await entityRef.collection('ratings').get();
       const ratings = ratingsSnap.docs.map(doc => doc.data());
 
       if (ratings.length === 0) {
-        return res.status(404).json({ message: 'No ratings found for this initiative' });
+        return res.status(200).json({ 
+          id,
+          averageRating: 0,
+          ratingsCount: 0,
+          ratings: []
+        });
       }
 
-      // Обчислюємо середнє значення
+      
       const total = ratings.reduce((sum, rating) => sum + rating.rate, 0);
       const averageRating = Number((total / ratings.length).toFixed(2));
 
-      // Трансформуємо дані для клієнта
+   
       const transformedData = {
         id,
         averageRating,

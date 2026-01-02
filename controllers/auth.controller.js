@@ -5,6 +5,7 @@ import { db } from '../config/dbConfig.js';
 //є
 class AuthController {
     register = async (req, res) => {
+        console.log('Register endpoint called', req.body);
         const { email, password } = req.body;
 
         if (!email || !password) {
@@ -29,18 +30,17 @@ class AuthController {
                 role: "user"
             });
 
-            const token = await admin.auth().createCustomToken(userRecord.uid);
-
             res.status(201).json({
                 statusCode: 201,
                 message: "User created",
-                uid: userRecord.uid,
-                token
+                uid: userRecord.uid
             });
         } catch (err) {
+            console.error('Register error:', err, err?.errorInfo);
             res.status(500).json({
                 statusCode: 500,
-                error: err.message
+                error: err.message,
+                details: err?.errorInfo || null
             });
         }
     };
